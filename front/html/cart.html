@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Kanap | Cart</title>
+</head>
+<body>
+    <header>
+
+        <div class="logo"><a href="#">Kanap.</a></div>
+
+    </header>
+
+    
+    <nav class="nav">
+
+        <ul class="left-nav">
+            <li><a href="/front/html/index.html">Home</a></li>
+            <li><a href="/front/html/index.html#our-products">Our Products</a></li>
+        </ul>
+
+        <ul>
+            <li><a href="/front/html/index.html#about-us">About us</a></li>
+            <li><a href="#">Cart</a></li>
+        </ul>
+    </nav>
+
+    <main>
+
+        <section class="cart-table">
+                
+            <div class="cart-items">
+                <h1 class="cart-title">Your Cart.</h1>
+            </div>
+
+            <div class="cart__price">
+                <h2 class="total-price">Total Cart Price: <span id="totalQuantity"></span> <span id="totalPrice"></span> €</h2>
+            </div>
+
+        </section>
+
+        <section class="form-order">
+
+            <div class="form-container">
+                <form method="get" class="cart-order-form">
+
+                    <h2>Just a few more seconds to complete your order :) </h2>
+    
+                    <div class="form-infos">
+                        <label for="firstName">First Name</label>
+                        <input type="text" name="firstName" id="firstName" required>
+                        <p id="firstNameErrorMsg"></p>
+                    </div>
+    
+                    <div class="form-infos">
+                        <label for="lastName">Name</label>
+                        <input type="text" name="lastName" id="lastName" required>
+                        <p id="lastNameErrorMsg"></p>
+                    </div>
+                      
+                    <div class="form-infos">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" id="address" required>
+                        <p id="addressErrorMsg"></p>
+                    </div>
+                    
+                    <div class="form-infos">
+                        <label for="city">City</label>
+                        <input type="text" name="city" id="city" required>
+                        <p id="cityErrorMsg"></p>
+                    </div>
+                      
+                    <div class="form-infos">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email" required>
+                        <p id="emailErrorMsg"></p>
+                    </div>
+                      
+                    <div class="submit-btn">
+                        <input type="submit" value="Order Now !" id="order">
+                    </div>
+    
+                </form>
+            </div>
+            
+        </section>
+
+    </main>
+
+    <script src="../js/cart.js"></script>
+</body>
+</html>
