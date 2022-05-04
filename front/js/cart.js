@@ -8,30 +8,37 @@ const cartTotalDiv = document.querySelector('.cart__price');
 const form = document.querySelector('.cart-order-form');
 
 // ==============================================================
+// If localStorage is populated, for each presents object, call the api and pass the received
+// data into functions parameter one after another. Each Function returns parameters, passing them
+// to the next one ('cascading')
 if(productsInCart) {
   productsInCart.forEach(object => {
     fetch(`http://localhost:3000/api/products/${object.id}`)
         .then((res) => res.json())
         .then((data) => totalItemPrice(data, object))
-        .then(({calculTotalPrice, data, object}) => showProductRow(calculTotalPrice, data, object))
+        .then(({ calculTotalPrice, data, object }) => showProductRow(calculTotalPrice, data, object))
         .then((object) => deleteProductOnClickEvent (object))
         .then((object) => changeProductQuantityOnChangeEvent(object))
         .catch((err) => alert(err))
   })
-} else {
+} else { // If the localStorage is empty, show nothing but a message on the page
         title.innerText = 'Your Cart Is Empty.';
         cartTotalPrice.style.display = 'none';
         form.style.display = 'none';
         cartTotalDiv.style.display = 'none';
 }
 
-  function totalItemPrice(data, object) {
-    const calculTotalPrice =  data.price * object.quantity;
+// Calculating the price of each individual item based on the price received form the API,
+// and the quantity based on the object from the localStorage
+function totalItemPrice(data, object) {
+  const calculTotalPrice =  data.price * object.quantity;
 
-    return {calculTotalPrice, data, object};
+  return { calculTotalPrice, data, object };
 };
 
 // ===============================================================
+// For each object, we create a new row ('article'), and passing the informations retrieved, 
+// into variables and append it to its container
 function showProductRow(calculItemPrice, data, object) {
 
     const productRow = document.createElement('article');
@@ -52,7 +59,7 @@ function showProductRow(calculItemPrice, data, object) {
               <div class="cart-item-quantity">
                   <p>Quantity: </p>
                   <input type="number" class="itemQuantity" name="itemQuantity" min="1" 
-                    max="100" value="${object.quantity}">
+                    max="100" value="${object.quantity}" data-quantity="${object.quantity}">
                 </div>  
             </div>
                
@@ -61,7 +68,7 @@ function showProductRow(calculItemPrice, data, object) {
             <h3 class="item-total-price">Total Price: ${calculItemPrice} €</h3> 
                             
                 <div class="cart-item-delete">
-                  <p class="delete-item-${object.id}" data-id="${object.id}" data-color="${object.color}">Delete</p>
+                  <p class="delete-item" data-delete="${object.id}" data-color="${object.color}">Delete</p>
                 </div>
 
             </div>
@@ -69,22 +76,22 @@ function showProductRow(calculItemPrice, data, object) {
 
     itemsContainer.appendChild(productRow);
     
-    computeTotalCartPrice(calculItemPrice);
+    computeTotalCartPrice(calculItemPrice); //Update 
     return object;
 }
 
 // ===============================================================
-
+// Attach a click event to the button
 function deleteProductOnClickEvent (object) {
-  const btn = document.querySelector(`.delete-item-${object.id}`);
-    
-
+  const btn = document.querySelector(`[data-delete="${object.id}"]`);
       
         btn.addEventListener('click', (e) => {
         e.preventDefault();
         
-        for(const [i, v] of productsInCart.entries()) {
-          if(v.id === object.id && v.color === object.color) {
+        // On click we splice (delete), the item from the array, update the localStorage and
+        // refresh the page
+        for(const [i, value] of productsInCart.entries()) {
+          if(value.id === object.id && value.color === object.color) {
             
             productsInCart.splice(i, 1);
             localStorage.setItem("products", JSON.stringify(productsInCart));
@@ -104,15 +111,13 @@ function deleteProductOnClickEvent (object) {
 
 // ===============================================================
 function changeProductQuantityOnChangeEvent(object) {
-  const changeQuantity = document.querySelectorAll('.itemQuantity');
-  
-  changeQuantity.forEach((btn) => {
+  const changeQuantity = document.querySelector(`[data-quantity="${object.quantity}"]`);  /// !!!!!!!!!!!!!!
    
-    btn.addEventListener('change', (e) => {
-      e.stopImmediatePropagation();
+    changeQuantity.addEventListener('change', (e) => {
+      e.preventDefault();
   
-      for(const [i, v] of productsInCart.entries()) {
-        if(v.id === object.id && v.color === object.color) {
+      for(const [i, value] of productsInCart.entries()) {
+        if(value.id === object.id && value.color === object.color) {
           
           productsInCart[i].quantity = e.target.value;
           localStorage.setItem("products", JSON.stringify(productsInCart));
@@ -120,27 +125,31 @@ function changeProductQuantityOnChangeEvent(object) {
         }
       }
     })   
-  })
+
   return object;
 }
 
 // ===============================================================
+// Creating a new Array that we'll populate with prices from our objects in the localStorage
 let priceArray = [];
 
 function computeTotalCartPrice(calculItemPrice) {
 
   priceArray.push(calculItemPrice);
 
+  // Add each price in the array one after another
   const totalPrice = priceArray.reduce((sum, value) => {
     return sum += value;
   }, 0);
 
+  // Append the result into it's HTML container
   cartTotalPrice.innerText = totalPrice;
 }
 
 // ==================== Form Validations ====================================
 const submitOrder = document.querySelector('#order');
 
+// Creating Regular Expressions
 const nameRegex = /^[a-zA-Z\-çñàéèêëïîôüù]{2,}$/;
 const addressRegex = /^[0-9a-zA-Z\s,.'-çñàéèêëïîôüù]{3,}$/;
 const emailRegex = /^[A-Za-z0-9\-\.]+@([A-Za-z0-9\-]+\.)+[A-Za-z0-9-]{2,4}$/;
@@ -151,10 +160,14 @@ const address = document.querySelector('#address');
 const city = document.querySelector('#city');
 const email = document.querySelector('#email');
 
+// Test the informations written by the user, using our RegEx,
+// if the input is not valid based on the RegEx, or if the field is empty,
+// a message will appear until corrected.
+
 // == FirstName validation ==
 firstName.addEventListener("input", () => {
   if (nameRegex.test(firstName.value) === false || firstName.value === "") {
-    document.getElementById("firstNameErrorMsg").innerText = "Unvalid first name :/";
+    document.getElementById("firstNameErrorMsg").innerText = "Unvalid field, please use more than one charater and/or no numbers :)";
   } else {
     document.getElementById("firstNameErrorMsg").innerHTML = "";
   }
@@ -163,7 +176,7 @@ firstName.addEventListener("input", () => {
 // == LastName validation == 
 lastName.addEventListener("input", () => {
   if (nameRegex.test(lastName.value) === false || lastName.value === "") {
-    document.getElementById("lastNameErrorMsg").innerHTML = "Unvalid name :/";
+    document.getElementById("lastNameErrorMsg").innerHTML = "Unvalid field, please use more than one charater and/or no numbers :)";
   } else {
     document.getElementById("lastNameErrorMsg").innerHTML = "";
   }
@@ -172,7 +185,7 @@ lastName.addEventListener("input", () => {
 // == Address validation == 
 address.addEventListener("input", () => {
   if (addressRegex.test(address.value) === false || address.value === "") {
-    document.getElementById("addressErrorMsg").innerHTML = "Unvalid address :/";
+    document.getElementById("addressErrorMsg").innerHTML = "Unvalid field, please use more than three charcters :)";
   } else {
     document.getElementById("addressErrorMsg").innerHTML = "";
   }
@@ -181,7 +194,7 @@ address.addEventListener("input", () => {
 // == City validation == 
 city.addEventListener("input", () => {
   if (nameRegex.test(city.value) === false || city.value === "") {
-    document.getElementById("cityErrorMsg").innerHTML = "Unvalid city :/";
+    document.getElementById("cityErrorMsg").innerHTML = "Unvalid field, please use more than one charater and/or no numbers :)";
   } else {
     document.getElementById("cityErrorMsg").innerHTML = "";
   }
@@ -190,17 +203,18 @@ city.addEventListener("input", () => {
 // == email validation == 
 email.addEventListener("input", () => {
   if (emailRegex.test(email.value) === false || email.value === "") {
-    document.getElementById("emailErrorMsg").innerHTML = "Unvalid email :/";
+    document.getElementById("emailErrorMsg").innerHTML = "Unvalid field, try it again based on this example: 'johndoe@email.com' :)";
   } else {
     document.getElementById("emailErrorMsg").innerHTML = "";
   }
 });
 
 // =============================================================
-// Post object and array API
+// Attach a click event on "Order Now !" button
 submitOrder.addEventListener('click', (e) => {
   e.preventDefault();
   
+  // onclick, creating a new Array that we populate with ids present in the localStorage
   const products = [];
   productsInCart.forEach((item) => {
     products.push(item.id);
@@ -223,6 +237,8 @@ submitOrder.addEventListener('click', (e) => {
     emailRegex.test(email.value) === false) 
     { alert("We need correct informations to go further! :)") }
 
+  // If all the criterias are Ok, then we create a new object which contains a contact object
+  // (populated with the user's infos) and the array of prices
   else {
     const newOrder = {
       contact: {
@@ -235,6 +251,7 @@ submitOrder.addEventListener('click', (e) => {
       products
     }
 
+    // Then we Post the newOrder object to the API
     fetch("http://localhost:3000/api/products/order", {
         method: 'POST',
         headers: {
@@ -243,6 +260,9 @@ submitOrder.addEventListener('click', (e) => {
         },
         body: JSON.stringify(newOrder)
     })
+    // The API send us a response, that we use to retreive the orderId
+    // which we use as a variable in the link to be redirected on the confirmation page
+    // when everything is ok 
         .then((res) => res.json())
         .then((confirm) => {
             location.href = "./confirmation.html?orderId=" + confirm.orderId;
@@ -251,3 +271,25 @@ submitOrder.addEventListener('click', (e) => {
         .catch((err) => console.log(err))
   }
 });
+
+//========================= Menu DropDown =========================
+
+const menu = document.querySelector('.menu');
+const nav = document.querySelector('.nav');
+
+menu.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    menu.classList.toggle('active');
+    nav.classList.toggle('mobile-view');
+})
+
+// ===
+const mouseCursor  = document.querySelector('.cursor');
+
+window.addEventListener('mousemove', cursor);
+
+function cursor(e) {
+    mouseCursor.style.top = e.pageY + 'px';
+    mouseCursor.style.left = e.pageX + 'px';
+}
